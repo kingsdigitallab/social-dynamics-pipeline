@@ -1,0 +1,17 @@
+[project]
+name = "your-app"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.5",
+    "ruff",
+    "black",
+    "mypy",
+    "isort",
+    "pre-commit"
+]

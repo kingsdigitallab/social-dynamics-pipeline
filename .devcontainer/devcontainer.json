@@ -1,0 +1,67 @@
+{
+  "name": "default-python-web-devcontainer",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "charliermarsh.ruff",
+        "ms-python.isort",
+        "redhat.vscode-yaml",
+        "bierner.markdown-mermaid",
+        "DavidAnson.vscode-markdownlint",
+        "ecmel.vscode-html-css",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+        "editor.formatOnPaste": true,
+        "editor.formatOnSave": true,
+        "editor.minimap.enabled": false,
+        "editor.renderWhitespace": "trailing",
+        "editor.rulers": [80, 120],
+        "editor.fontFamily": "'JetBrainsMono Nerd Font Propo', Menlo, Monaco, 'Courier New', monospace",
+        "editor.fontLigatures": true,
+        "editor.fontSize": 14,
+        "explorer.compactFolders": false,
+        "explorer.confirmDragAndDrop": false,
+        "explorer.sortOrder": "filesFirst",
+        "files.autoSave": "onWindowChange",
+        "git.autofetch": true,
+        "window.autoDetectColorScheme": true,
+        "workbench.editorAssociations": {
+          "*.json": "default"
+        },
+        "[css]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[html]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[markdown]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[nunjucks]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        }
+      }
+    }
+  },
+  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && ~/.local/bin/uv venv && ~/.local/bin/uv pip install -e .[dev] && ~/.local/bin/pre-commit install",
+  "remoteUser": "vscode"
+}

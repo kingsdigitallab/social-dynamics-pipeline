@@ -163,6 +163,10 @@ cython_debug/
 # PyCharm
 .idea/
 
+# VSCode local IDE settings (use devcontainer for consistent env)
+.vscode/
+*.code-workspace
+
 # Ruff stuff:
 .ruff_cache/
 

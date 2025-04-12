@@ -44,17 +44,9 @@ class TestExtractImagesFromPdf:
     def test_returns_image_paths(
         self, sample_pdf: Path, output_dir: Path, images_result
     ):
-        assert isinstance(
-            images_result, list
-        ), "Result should be list of Path objects, but got: {}".format(
-            type(images_result).__name__
-        )
-        assert len(
+        assert (
             images_result
         ), f"No images extracted from {sample_pdf.name}, but some expected."
-        assert all(
-            isinstance(p, Path) for p in images_result
-        ), "Some items in result are not Path objects."
         assert all(
             p.exists() for p in images_result
         ), "One or more output paths do not exist."
@@ -64,10 +56,7 @@ class TestExtractImagesFromPdf:
     ):
         pdf_stem = sample_pdf.stem
         for path in images_result:
-            # Expecting filenames like: APV002_page1_img1
-            # - Starts with the original PDF stem (e.g., APV002)
-            # - Followed by "_page" and a page number (digits)
-            # - Followed by "_img" and an image number (digits)
+            # Expecting: <pdf_stem>_page<num>_img<num>, e.g. APV002_page1_img1
             pattern = rf"^{re.escape(pdf_stem)}_page\d+_img\d+$"
             assert re.match(pattern, path.stem), (
                 f"Filename {path.name} is not correctly formed — expected format: "

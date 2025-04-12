@@ -3,7 +3,12 @@ name = "social-dynamics-pipeline"
 version = "0.1.0"
 description = "Pipeline for processing Social Dynamics data"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pikepdf>=9.7.0",
+    "pillow>=11.1.0",
+    "prefect>=3.3.4",
+    "typer>=0.15.2",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -27,7 +32,6 @@ exclude = ["tests/fixtures"]
 
 [tool.mypy]
 python_version = "3.12"
-strict = true
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

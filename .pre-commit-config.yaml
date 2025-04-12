@@ -3,6 +3,7 @@ repos:
     rev: v0.4.1
     hooks:
       - id: ruff
+        args: [ --fix ]
 
   - repo: https://github.com/psf/black
     rev: 24.4.2
@@ -14,11 +15,6 @@ repos:
     hooks:
       - id: mypy
 
-  - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.13.2
-    hooks:
-      - id: isort
-  
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:

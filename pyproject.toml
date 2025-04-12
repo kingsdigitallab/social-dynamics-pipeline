@@ -11,6 +11,27 @@ dev = [
     "ruff",
     "black",
     "mypy",
-    "isort",
-    "pre-commit"
+    "pre-commit",
+    "reportlab"
 ]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+lint.select = ["E", "F", "B", "I"]
+exclude = ["tests/fixtures"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = ["tests"]

@@ -177,3 +177,7 @@ cython_debug/
 .DS_Store
 .Spotlight-V100
 .Trashes
+
+# Private test data
+/tests/data/private/
+/tests/data/output/

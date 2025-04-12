@@ -1,7 +1,7 @@
 from logging.config import dictConfig
 
 
-def setup_logging():
+def setup_logging(level: str = "INFO"):
     dictConfig(
         {
             "version": 1,
@@ -18,8 +18,15 @@ def setup_logging():
                 },
             },
             "root": {
-                "level": "INFO",
+                "level": level.upper(),
                 "handlers": ["console"],
+            },
+            "loggers": {
+                "pikepdf": {
+                    "level": "WARNING",  # suppress INFO unless explicitly asked
+                    "handlers": ["console"],
+                    "propagate": False,
+                }
             },
         }
     )

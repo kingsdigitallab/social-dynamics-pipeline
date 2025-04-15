@@ -4,10 +4,11 @@ version = "0.1.0"
 description = "Pipeline for processing Social Dynamics data"
 requires-python = ">=3.10"
 dependencies = [
-    "pikepdf",
-    "pillow",
-    "prefect",
-    "typer",
+    "nicegui>=2.14.1",
+    "pikepdf>=9.7.0",
+    "pillow>=11.2.1",
+    "prefect>=3.3.4",
+    "typer>=0.15.2",
 ]
 
 [project.optional-dependencies]

@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from typing import Annotated
 
@@ -17,11 +18,12 @@ app = typer.Typer()
 r"""
 Example usage:
 
-$ python -m pipeline extract-images --pdf-path path/to/file.pdf --output-dir output/
-$ python -m pipeline thumbnail --image-path output/file_img_0.jpg \
-    --output-dir output/thumbnails/
+$ python -m pipeline extract-images --pdf-path path/to/file.pdf \
+    --output-dir output/ --log-level INFO
+$ python -m pipeline thumbnail-images --img-path path/to/img.jpg \
+    --output-dir output/thumbnails --log-level INFO
 $ python -m pipeline extract-and-thumbnail --pdf-path path/to/file.pdf \
-    --image-dir output/
+    --output-dir output/ --log-level INFO
 """
 
 
@@ -77,6 +79,8 @@ def extract_images(
 
     setup_logging(log_level)
 
+    start_time = time.time()
+
     pdf_path = Path(pdf_path)
     output_dir = Path(output_dir)
 
@@ -84,19 +88,22 @@ def extract_images(
         results = extract_images_from_dir(pdf_path, output_dir)
         total_pdfs = len(results)
         total_images = sum(len(imgs) for imgs in results.values())
+        total_time = time.time() - start_time
         typer.echo(
             typer.style(
                 f"Extracted {total_images} images from {total_pdfs} PDFs "
-                f"into {output_dir}",
+                f"into {output_dir} in {total_time:.1f} seconds",
                 fg=typer.colors.GREEN,
                 bold=True,
             )
         )
     elif pdf_path.is_file():
         images = extract_images_from_pdf(pdf_path, output_dir)
+        total_time = time.time() - start_time
         typer.echo(
             typer.style(
-                f"Extracted {len(images)} images to {output_dir}",
+                f"Extracted {len(images)} images to {output_dir} in "
+                f"{total_time:.1f} seconds",
                 fg=typer.colors.GREEN,
                 bold=True,
             )

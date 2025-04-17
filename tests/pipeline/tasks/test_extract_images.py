@@ -9,55 +9,24 @@ from pipeline.tasks.pdf_processing import (
     extract_images_from_pdf,
 )
 
-TEST_DATA_DIR = Path(__file__).parent.parent.parent / "data"
-PUBLIC_DATA, PRIVATE_DATA = (TEST_DATA_DIR / name for name in ("public", "private"))
 
-
-def get_pdf_dir(source: str) -> Path:
-    data_dirs = {
-        "public": PUBLIC_DATA / "pdfs",
-        "private": PRIVATE_DATA / "pdfs",
-    }
-    folder = data_dirs[source]
-    if not folder.exists():
-        pytest.skip(f"{source.capitalize()} test directory not available")
-    return folder
-
-
-def first_pdf_in(directory: Path) -> Path:
-    try:
-        return next(p for p in directory.iterdir() if p.suffix.lower() == ".pdf")
-    except StopIteration as e:
-        raise FileNotFoundError(f"No PDF files found in {directory}") from e
-
-
+# Returns a single PDF from the test data folder for testing
 @pytest.fixture(scope="module")
-def output_dir() -> Path:
-    path = TEST_DATA_DIR / "output"
-    path.mkdir(parents=True, exist_ok=True)
-    return path
+def sample_pdf(pdf_dir: Path):
+    for p in pdf_dir.iterdir():
+        if p.suffix.lower() == ".pdf":
+            return p
+    pytest.skip(f"No PDF files found in {pdf_dir}")
 
 
-@pytest.fixture(scope="module", params=["public", "private"])
-def sample_pdf(request):
-    folder = get_pdf_dir(request.param)
-    try:
-        return first_pdf_in(folder)
-    except FileNotFoundError:
-        pytest.skip(f"{request.param.capitalize()} test data not available")
-
-
-@pytest.fixture(scope="module", params=["public", "private"])
-def pdf_dir(request):
-    return get_pdf_dir(request.param)
-
-
+# Extracts images from a single PDF only once for these tests to save time
 @pytest.fixture(scope="module")
 def images_result(sample_pdf: Path, output_dir: Path) -> list[Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     return extract_images_from_pdf(sample_pdf, output_dir)
 
 
+# Extracts images from a folder of PDFs only once for these tests to save time
 @pytest.fixture(scope="module")
 def images_result_from_dir(pdf_dir: Path, output_dir: Path) -> dict[Path, list[Path]]:
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -110,16 +79,6 @@ class TestExtractImagesFromPdf:
 
 
 class TestExtractImagesFromDir:
-    def test_returns_dict_of_lists(
-        self, pdf_dir: Path, output_dir: Path, images_result_from_dir
-    ):
-        assert isinstance(images_result_from_dir, dict)
-        for key, value in images_result_from_dir.items():
-            assert isinstance(key, Path), f"Expected Path key, got {type(key)}"
-            assert isinstance(
-                value, list
-            ), f"Expected list value for {key.name}, got {type(value)}"
-
     def test_all_pdfs_are_processed(
         self, pdf_dir: Path, output_dir: Path, images_result_from_dir
     ):

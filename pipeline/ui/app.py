@@ -1,56 +1,55 @@
-import asyncio
-import functools
-from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
+from config import settings
+from nicegui import app, ui
 
-from nicegui import ui
-
-from pipeline.tasks.pdf_processing import extract_images_from_pdf
-
-executor = ThreadPoolExecutor()
-
-ui.label("Extract Images from PDF").classes("text-h5")
-
-pdf_input = ui.input(label="Path to PDF file").classes("w-full")
-outdir_input = ui.input(label="Output directory").classes("w-full")
-spinner = ui.spinner(size="lg").props("color=primary").classes("q-mt-md")
-spinner.visible = False
+from pipeline.ui.views.blank_detection import render as render_blank_detection
+from pipeline.ui.views.extract_images import render as render_extract_images
+from pipeline.ui.views.layout import layout
 
 
-async def run_extraction():
-    if not pdf_input.value:
-        ui.notify("Please enter a PDF file path.", color="warning")
-        return
-
-    pdf_path = Path(pdf_input.value)
-    output_dir = Path(outdir_input.value)
-
-    if not pdf_path.exists():
-        ui.notify(f"PDF path does not exist: {pdf_path}", color="negative")
-        return
-    if not pdf_path.suffix.lower() == ".pdf":
-        ui.notify(f"Not a PDF file: {pdf_path}", color="warning")
-        return
-
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Disable inputs and show spinner
-    pdf_input.disable()
-    outdir_input.disable()
-    spinner.visible = True
-
-    images = await asyncio.get_event_loop().run_in_executor(
-        executor, functools.partial(extract_images_from_pdf, pdf_path, output_dir)
-    )
-
-    # Re-enable inputs and hide spinner
-    spinner.visible = False
-    pdf_input.enable()
-    outdir_input.enable()
-
-    ui.notify(f"Extracted {len(images)} images to {output_dir}", color="positive")
+@ui.page("/", title="Home")
+def home():
+    with layout("Home"):
+        ui.label("Coming soon...")
+        # content here
 
 
-ui.button("Extract", on_click=run_extraction).classes("mt-4")
+@ui.page("/extract-images", title="Extract Images from PDF")
+def extract_images_page():
+    with layout("Extract Images from PDF"):
+        render_extract_images()
 
+
+@ui.page("/blank-detection", title="Blank Page Detection")
+def blank_detection_page():
+    with layout("Blank Page Detection"):
+        zoom_dialog = ui.dialog().classes("items-center justify-center")
+        with zoom_dialog:
+            zoomed_image = ui.image().classes(
+                "max-w-[90vw] max-h-[90vh] rounded shadow-lg"
+            )
+            ui.button(icon="close", on_click=zoom_dialog.close).props(
+                'icon="close"'
+            ).tooltip("Close").classes(
+                "absolute top-2 right-2 z-10 bg-white text-black rounded-full shadow-md"
+            )
+
+        def show_zoom(original_path: str):
+            """Display a zoomed-in version of the selected image in a dialog."""
+            zoomed_image.set_source(original_path)
+            zoom_dialog.open()
+
+        render_blank_detection()
+
+
+@ui.page("/form-classification", title="Form Type Classification")
+def form_classification_page():
+    with layout("Form Type Classification"):
+        ui.label("Coming soon...")
+        # content here
+
+
+app.add_static_files(
+    str(settings.images_url_base),
+    str(settings.images_dir),
+)
 ui.run()

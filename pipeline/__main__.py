@@ -1,6 +1,6 @@
 import time
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 
@@ -215,6 +215,111 @@ def thumbnail_images(
 def extract_and_thumbnail():
     """Extract images from a PDF and create thumbnails for them in one step."""
     raise NotImplementedError
+
+
+@app.command("resize-images")
+def resize_images(
+    img_path: Annotated[
+        Path,
+        typer.Option(
+            "--img-path", "-p", help="Path to the image file or directory of images."
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir", "-o", help="Directory where resized images will be saved."
+        ),
+    ],
+    width: Annotated[
+        Optional[int],
+        typer.Option("--width", "-w", help="Target width in pixels."),
+    ] = None,
+    height: Annotated[
+        Optional[int],
+        typer.Option("--height", "-h", help="Target height in pixels."),
+    ] = None,
+    log_level: Annotated[
+        str,
+        typer.Option(
+            "--log-level",
+            "-l",
+            help="Set logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL",
+            case_sensitive=False,
+        ),
+    ] = "WARNING",
+):
+    """
+    Resize image(s) to a specified width and/or height while maintaining aspect ratio.
+
+    Takes either a single image file or a directory of image files and resizes them,
+    saving the outputs to the specified directory. Filenames are suffixed with the
+    target dimensions. If both width and height are given, images are resized to fit
+    within those bounds while preserving the aspect ratio.
+
+    Use --log-level to control verbosity. Defaults to WARNING.
+    """
+    log_level = log_level.upper()
+    if log_level not in VALID_LOG_LEVELS:
+        typer.echo(
+            typer.style(
+                f"Invalid log level: {log_level}. "
+                f"Choose from: DEBUG, INFO, WARNING, ERROR, CRITICAL.",
+                fg=typer.colors.RED,
+                bold=True,
+            ),
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    if width is None and height is None:
+        typer.echo(
+            typer.style(
+                "You must provide at least one of --width or --height.",
+                fg=typer.colors.RED,
+                bold=True,
+            ),
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    setup_logging(log_level)
+    start_time = time.time()
+
+    if img_path.is_dir():
+        results = resize_images_from_dir(
+            img_path, output_dir, width=width, height=height
+        )
+        total_images = sum(len(paths) for paths in results.values())
+        total_time = time.time() - start_time
+        typer.echo(
+            typer.style(
+                f"Resized {total_images} images from {len(results)} source files "
+                f"into {output_dir} in {total_time:.1f} seconds",
+                fg=typer.colors.GREEN,
+                bold=True,
+            )
+        )
+    elif img_path.is_file():
+        result = resize_image(img_path, output_dir, width=width, height=height)
+        total_time = time.time() - start_time
+        typer.echo(
+            typer.style(
+                f"Resized image in {total_time:.1f} seconds: {result}",
+                fg=typer.colors.GREEN,
+                bold=True,
+            )
+        )
+    else:
+        typer.echo(
+            typer.style(
+                "Error: --img-path must be a valid file or directory.",
+                fg=typer.colors.RED,
+                bold=True,
+            ),
+            err=True,
+        )
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

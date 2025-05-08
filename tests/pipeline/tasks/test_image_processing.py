@@ -61,16 +61,33 @@ class TestResizeImageFromFile:
                 img.height == TARGET_DIMENSION
             ), f"Expected height {TARGET_DIMENSION}, got {img.height}"
 
-    def test_resize_image_to_exact_dimensions(
+    def test_resize_image_fits_within_dimensions_preserves_aspect_ratio(
         self, sample_image: Path, output_img_dir: Path
     ):
-        width, height = TARGET_DIMENSION, TARGET_DIMENSION
-        result = resize_image(sample_image, output_img_dir, width=width, height=height)
+        max_width, max_height = 200, 100
 
+        result = resize_image(
+            sample_image, output_img_dir, width=max_width, height=max_height
+        )
         assert result.exists(), f"Output file was not created: {result}"
-        with Image.open(result) as img:
-            assert img.width == width, f"Expected width {width}, got {img.width}"
-            assert img.height == height, f"Expected height {height}, got {img.height}"
+
+        with Image.open(sample_image) as original, Image.open(result) as resized:
+            orig_ratio = original.width / original.height
+            resized_ratio = resized.width / resized.height
+
+            # Check that dimensions are within bounds
+            assert (
+                resized.width <= max_width
+            ), f"Width {resized.width} exceeds max {max_width}"
+            assert (
+                resized.height <= max_height
+            ), f"Height {resized.height} exceeds max {max_height}"
+
+            # Check that aspect ratio was preserved within a tolerance
+            assert abs(resized_ratio - orig_ratio) < 0.1, (
+                f"Aspect ratio changed: expected ~{orig_ratio:.2f}, "
+                f"got {resized_ratio:.2f}"
+            )
 
     def test_filename_has_width_suffix(self, sample_image: Path, output_img_dir: Path):
         width = 150

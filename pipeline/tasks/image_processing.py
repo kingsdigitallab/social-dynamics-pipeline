@@ -26,7 +26,8 @@ def resize_image(
     Opens the image at `input_path` and resizes it based on either the provided
     `width`, `height`, or both. If only one dimension is specified, the other is
     calculated to preserve the original aspect ratio. If both dimensions are given,
-    the image is resized exactly to those dimensions (aspect ratio may change).
+    the image is resized to fit *within* the given width and height,
+    preserving aspect ratio.
 
     Resized image is saved to `output_dir` with a modified filename that includes
     suffixes indicating the resized dimensions.
@@ -57,16 +58,21 @@ def resize_image(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     with Image.open(img_path) as img:
-        if width is not None and height is not None:
-            new_size = (width, height)
+        orig_width, orig_height = img.size
+        if width and height:
+            # Scale to fit within the box maintaining aspect ratio
+            width_ratio = width / orig_width
+            height_ratio = height / orig_height
+            scale = min(width_ratio, height_ratio)
+            new_size = (int(orig_width * scale), int(orig_height * scale))
             suffix = f"_w{width}px_h{height}px"
-        elif width is not None:
-            ratio = width / img.width
-            new_size = (width, int(img.height * ratio))
+        elif width:
+            scale = width / orig_width
+            new_size = (width, int(orig_height * scale))
             suffix = f"_w{width}px"
-        elif height is not None:
-            ratio = height / img.height
-            new_size = (int(img.width * ratio), height)
+        elif height:
+            scale = height / orig_height
+            new_size = (int(orig_width * scale), height)
             suffix = f"_h{height}px"
 
         output_name = f"{img_path.stem}{suffix}{img_path.suffix}"

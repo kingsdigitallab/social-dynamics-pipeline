@@ -2,7 +2,9 @@ from config import settings
 from nicegui import app, ui
 
 from pipeline.ui.views.blank_detection import render as render_blank_detection
+from pipeline.ui.views.browse_images import render as render_browse_images
 from pipeline.ui.views.extract_images import render as render_extract_images
+from pipeline.ui.views.form_classification import render as render_form_classification
 from pipeline.ui.views.layout import layout
 
 
@@ -11,6 +13,12 @@ def home():
     with layout("Home"):
         ui.label("Coming soon...")
         # content here
+
+
+@ui.page("/browse-images", title="Browse Images")
+def browse_images_page():
+    with layout(""):
+        render_browse_images()
 
 
 @ui.page("/extract-images", title="Extract Images from PDF")
@@ -44,8 +52,7 @@ def blank_detection_page():
 @ui.page("/form-classification", title="Form Type Classification")
 def form_classification_page():
     with layout("Form Type Classification"):
-        ui.label("Coming soon...")
-        # content here
+        render_form_classification()
 
 
 app.add_static_files(

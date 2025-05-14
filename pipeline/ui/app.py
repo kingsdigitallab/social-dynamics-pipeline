@@ -2,6 +2,7 @@ from config import settings
 from nicegui import app, ui
 
 from pipeline.ui.views.blank_detection import render as render_blank_detection
+from pipeline.ui.views.browse_database import render as render_browse_database
 from pipeline.ui.views.browse_images import render as render_browse_images
 from pipeline.ui.views.extract_images import render as render_extract_images
 from pipeline.ui.views.form_classification import render as render_form_classification
@@ -53,6 +54,12 @@ def blank_detection_page():
 def form_classification_page():
     with layout("Form Type Classification"):
         render_form_classification()
+
+
+@ui.page("/browse-database", title="Browse Database")
+def browse_database_page():
+    with layout("Browse Database"):
+        render_browse_database()
 
 
 app.add_static_files(

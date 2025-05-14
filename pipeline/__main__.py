@@ -5,6 +5,7 @@ from typing import Annotated, Optional
 import typer
 
 from pipeline.logging_config import setup_logging
+from pipeline.tasks.db_import_b102r import import_all_in_dir
 from pipeline.tasks.image_processing import resize_image, resize_images_from_dir
 from pipeline.tasks.pdf_processing import (
     extract_images_from_dir,
@@ -24,8 +25,8 @@ $ python -m pipeline extract-images --pdf-path path/to/file.pdf \
     --output-dir output/ --log-level INFO
 $ python -m pipeline thumbnail-images --img-path path/to/img.jpg \
     --output-dir output/thumbnails --log-level INFO
-$ python -m pipeline extract-and-thumbnail --pdf-path path/to/file.pdf \
-    --output-dir output/ --log-level INFO
+$ python -m pipeline import-b102r --input-dir path/to/dir \
+    --log-level INFO
 """
 
 
@@ -320,6 +321,75 @@ def resize_images(
             err=True,
         )
         raise typer.Exit(code=1)
+
+
+@app.command("import-b102r")
+def import_b102r(
+    input_dir: Annotated[
+        Path,
+        typer.Option(
+            "--input-dir",
+            "-i",
+            help="Directory containing B102r JSON files to import.",
+        ),
+    ],
+    log_level: Annotated[
+        str,
+        typer.Option(
+            "--log-level",
+            "-l",
+            help="Set the logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL.",
+            case_sensitive=False,
+        ),
+    ] = "WARNING",
+):
+    """
+    Import all B102r-form JSON files from a directory into the database.
+
+    This command loads raw data extracted from forms into the database for review.
+
+    Use the --log-level option to control verbosity. Defaults to WARNING.
+    """
+    log_level = log_level.upper()
+
+    if log_level not in VALID_LOG_LEVELS:
+        typer.echo(
+            typer.style(
+                f"Invalid log level: {log_level}. Choose from: DEBUG, INFO, "
+                f"WARNING, ERROR, CRITICAL.",
+                fg=typer.colors.RED,
+                bold=True,
+            ),
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    setup_logging(log_level)
+
+    start_time = time.time()
+
+    if not input_dir.exists() or not input_dir.is_dir():
+        typer.echo(
+            typer.style(
+                f"Error: {input_dir} is not a valid directory.",
+                fg=typer.colors.RED,
+                bold=True,
+            ),
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    import_all_in_dir(input_dir)
+
+    elapsed = time.time() - start_time
+    typer.echo(
+        typer.style(
+            f"Successfully imported B102r forms from {input_dir} "
+            f"in {elapsed:.1f} seconds.",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+    )
 
 
 if __name__ == "__main__":

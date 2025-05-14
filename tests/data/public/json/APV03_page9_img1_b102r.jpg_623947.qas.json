@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "started": 0,
+    "version": "0.2.0"
+  },
+  "models": {
+    "Qwen/Qwen2.5-VL-3B-Instruct:": {
+      "questions": {
+        "B102r_1_Last_name": {
+          "answer": "JOHNSON",
+          "hash": "What is the surname of the person recorded on this form? Answer only with the surname."
+        },
+        "B102r_2_First_name": {
+          "answer": "James",
+          "hash": "What is the christian name of the person recorded on this form? Answer only with the christian names."
+        },
+        "B102r_3_Army_number": {
+          "answer": "3689419",
+          "hash": "What is the army number of the person recorded on this form? Answer only with the army number and remove any puncutation."
+        },
+        "B102r_4_Regiment": {
+          "answer": "RA",
+          "hash": "What is the name of the regiment or corps of the recorded person on this form? Answer only with the regiment or corp identifier."
+        },
+        "B102r_5_Nature_of_engagement": {
+          "answer": "TA",
+          "hash": "What is the nature of engagement recorded on this form? Answer only with the nature of engagement."
+        },
+        "B102r_6_Joining_date": {
+          "answer": "26/05/1943",
+          "hash": "What is the date of joining or date of enlistment of the person recorded on this form? Answer only with the date in the form DD/MM/YYYY"
+        },
+        "B102r_7_DOB": {
+          "answer": "19/04/1928",
+          "hash": "What is the date of birth of the person recorded on this form? Answer only with the date in the form DD/MM/YYYY"
+        },
+        "B102r_8_Nationality": {
+          "answer": "W",
+          "hash": "What is the nationality or dual nationality of the person recorded on this form? Answer only with the nationality identifier."
+        },
+        "B102r_9_Religion": {
+          "answer": "R.C.",
+          "hash": "What is the religion of the person recorded on this form? Answer only with the religion identifier."
+        },
+        "B102r_10_Industry": {
+          "answer": "M.L.",
+          "hash": "What is the industry group recorded for the person on this form? Answer only with the industry group identifier."
+        },
+        "B102r_11_Occupation": {
+          "answer": "874/12",
+          "hash": "What is the occupational classification of the person on this form? Answer only with the occupational classification."
+        },
+        "B102r_12_Non_effective_cause": {
+          "answer": "Killed in Action",
+          "hash": "What is the cause of becoming non-effective for person recorded on this form? Answer only with the cause."
+        },
+        "B102r_13_Marital_status": {
+          "answer": "M",
+          "hash": "What is the single or married status of the person recorded on this form? Answer only with the single or married status."
+        },
+        "B102r_14_Hometown": {
+          "answer": "London",
+          "hash": "What is the hometown and county of the person recorded on this form? Answer only with the hometown and county."
+        },
+        "B102r_19_Location": {
+          "answer": "Glasgow",
+          "hash": "What is the location of the person recorded on this form? Answer only with the location."
+        },
+        "B102r_A_Rank": {
+          "answer": "Sgt",
+          "hash": "What is the rank of the person recorded on this form? Answer only with the rank."
+        },
+        "B102r_B_Service_trade": {
+          "answer": "Cook",
+          "hash": "What is the service trade of the person recorded on this form? Answer only with the service trade."
+        },
+        "B102r_C_Medical_category": {
+          "answer": "C-3",
+          "hash": "What is the medical category of the person recorded on this form? Answer only with the medical category."
+        },
+        "B102r_Text_json": {
+          "answer": "{}",
+          "hash": "Extract all the text from the image into a JSON object. Answer only with a valid JSON object and include no newlines or markdown. Ensure each key is a printed question or label and each value is the corresponding handwritten response."
+        },
+        "B102r_Form_type": {
+          "answer": "A.F.B. 102",
+          "hash": "What is this form type? Answer only with the exact form number."
+        }
+      }
+    }
+  }
+}

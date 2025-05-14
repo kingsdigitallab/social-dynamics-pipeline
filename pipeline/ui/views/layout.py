@@ -10,10 +10,11 @@ def layout(title: str):
         .style("background-color: #ebf1fa")
         .props("bordered") as left_drawer
     ):
-        ui.link("🖼️ Browse Images", "/browse-images").classes("text-xl")
+        ui.link("📁️ Browse Images", "/browse-images").classes("text-xl")
         ui.link("🖼️ Extract Images", "/extract-images").classes("text-xl")
-        ui.link("📄 Blank Detection", "/blank-detection").classes("text-xl")
-        ui.link("📝 Form Classification", "/form-classification").classes("text-xl")
+        ui.link("📄 Blank Detection (Demo)", "/blank-detection").classes("text-xl")
+        # ui.link("📝 Form Classification", "/form-classification").classes("text-xl")
+        ui.link("🔎 Browse Database", "/browse-database").classes("text-xl")
 
     with (
         ui.header(elevated=True)

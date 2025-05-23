@@ -28,10 +28,10 @@ def detect_blanks(method: str, input_path: str, **kwargs):
     if settings.demo_mode:
         time.sleep(2)  # Simulate processing time
         blanks_ = [
-            f"/images/test_pdf_1_page{i}_img1.jpg" for i in range(1, 3)
+            f"/images/testpdf1/testpdf1_page{i}_img1.jpg" for i in range(1, 3)
         ]  # Simulate blanks
         not_blanks_ = [
-            f"/images/test_pdf_1_page{i}_img1.jpg" for i in range(3, 6)
+            f"/images/testpdf1/testpdf1_page{i}_img1.jpg" for i in range(3, 6)
         ]  # Simulate non-blanks
         return blanks_, not_blanks_
 
@@ -61,7 +61,9 @@ def thumbnail_path(original_path: str) -> str:
     """Return the path to the thumbnail version of the given original image path."""
     if settings.demo_mode:
         orig_path = Path(original_path)
-        return f"/images/thumbnails/{orig_path.stem}_w150px{orig_path.suffix}"
+        orig_stem = orig_path.stem
+        orig_dir = orig_stem.split("_")[0]
+        return f"/images/{orig_dir}/thumbnails/{orig_stem}_w150px{orig_path.suffix}"
 
     # The real thumbnail function will be added here when ready.
     # return f"/images/thumbnails/{orig_path.stem}_thumbnail{orig_path.suffix}"

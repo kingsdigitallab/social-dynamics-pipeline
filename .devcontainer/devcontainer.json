@@ -62,6 +62,7 @@
       }
     }
   },
-  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && ~/.local/bin/uv venv && ~/.local/bin/uv pip install -e .[dev] && ~/.local/bin/pre-commit install",
+  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && ~/.local/bin/uv venv && ~/.local/bin/uv pip install -e .[dev] && ~/.local/bin/uv run pre-commit install",
+  "postStartCommand": "~/.local/bin/uv run python pipeline/ui/app.py",
   "remoteUser": "vscode"
 }

@@ -7,7 +7,6 @@ dependencies = [
     "nicegui>=2.14.1",
     "pikepdf>=9.7.0",
     "pillow>=11.2.1",
-    "prefect>=3.3.4",
     "pydantic-settings>=2.8.1",
     "sqlmodel>=0.0.24",
     "typer>=0.15.2",

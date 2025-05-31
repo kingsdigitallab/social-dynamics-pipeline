@@ -22,7 +22,10 @@
         "editor.formatOnSave": true,
         "editor.minimap.enabled": false,
         "editor.renderWhitespace": "trailing",
-        "editor.rulers": [80, 120],
+        "editor.rulers": [
+          80,
+          120
+        ],
         "editor.fontFamily": "'JetBrainsMono Nerd Font Propo', Menlo, Monaco, 'Courier New', monospace",
         "editor.fontLigatures": true,
         "editor.fontSize": 14,
@@ -63,6 +66,6 @@
     }
   },
   "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && ~/.local/bin/uv venv && ~/.local/bin/uv pip install -e .[dev] && ~/.local/bin/uv run pre-commit install",
-  "postStartCommand": "~/.local/bin/uv run python pipeline/ui/app.py",
+  "postStartCommand": "~/.local/bin/uv run python pipeline/ui/muster/app.py",
   "remoteUser": "vscode"
 }

@@ -1,6 +1,6 @@
 # mypy: disable-error-code=call-arg
 
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
@@ -343,3 +343,26 @@ class FormB102r(SQLModel, table=True):
         foreign_key="place.id",
         description="Normalised home town value",
     )
+
+
+# ------------------------
+# Audit log of changes to data
+# ------------------------
+class AuditLog(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    table_name: str = Field(index=True)
+    record_id: int = Field(index=True)
+    field_name: str
+    field_type: Optional[str] = Field(default=None)
+
+    # These strings should be JSON in the form:
+    # {"label": "Married", "id": 2} for lookups
+    # {"label": "Married"} for text fields
+    old_value: Optional[str] = Field(default=None)
+    new_value: Optional[str] = Field(default=None)
+
+    change_reason: Optional[str] = Field(default="manual")
+    session_id: Optional[str] = Field(default=None)
+
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

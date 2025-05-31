@@ -354,13 +354,21 @@ class AuditLog(SQLModel, table=True):
     table_name: str = Field(index=True)
     record_id: int = Field(index=True)
     field_name: str
-    field_type: Optional[str] = Field(default=None)
+    field_type: Optional[str] = Field(
+        default=None,
+        description="Field datatype or lookup table name if this is a foreign key "
+        "field",
+    )
 
     # These strings should be JSON in the form:
     # {"label": "Married", "id": 2} for lookups
     # {"label": "Married"} for text fields
-    old_value: Optional[str] = Field(default=None)
-    new_value: Optional[str] = Field(default=None)
+    old_value: Optional[str] = Field(
+        default=None, description="Old field value: string should be in JSON format"
+    )
+    new_value: Optional[str] = Field(
+        default=None, description="New field value: string should be in JSON format"
+    )
 
     change_reason: Optional[str] = Field(default="manual")
     session_id: Optional[str] = Field(default=None)

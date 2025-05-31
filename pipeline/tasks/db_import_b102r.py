@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 from sqlmodel import Session, select
 
@@ -21,28 +22,48 @@ def extract_b102r_data(source_filename: Path, json_data: dict) -> FormB102r:
     model_data = next(iter(json_data["models"].values()))  # First model section
     answers = model_data["questions"]
 
+    def answer(key: str) -> Optional[str]:
+        return answers.get(key, {}).get("answer")
+
     return FormB102r(
-        lastname_raw=answers.get("B102r_1_Last_name", {}).get("answer"),
-        firstname_raw=answers.get("B102r_2_First_name", {}).get("answer"),
-        army_number_raw=answers.get("B102r_3_Army_number", {}).get("answer"),
-        regiment_or_corp_raw=answers.get("B102r_4_Regiment", {}).get("answer"),
-        engagement_raw=answers.get("B102r_5_Nature_of_engagement", {}).get("answer"),
-        date_of_enlistment_raw=answers.get("B102r_6_Joining_date", {}).get("answer"),
-        dob_raw=answers.get("B102r_7_DOB", {}).get("answer"),
-        nationality_raw=answers.get("B102r_8_Nationality", {}).get("answer"),
-        religion_raw=answers.get("B102r_9_Religion", {}).get("answer"),
-        industry_group_raw=answers.get("B102r_10_Industry", {}).get("answer"),
-        occupation_raw=answers.get("B102r_11_Occupation", {}).get("answer"),
-        non_effective_cause_raw=answers.get("B102r_12_Non_effective_cause", {}).get(
-            "answer"
-        ),
-        marital_status_raw=answers.get("B102r_13_Marital_status", {}).get("answer"),
-        hometown_raw=answers.get("B102r_14_Hometown", {}).get("answer"),
-        location_raw=answers.get("B102r_19_Location", {}).get("answer"),
-        rank_raw=answers.get("B102r_A_Rank", {}).get("answer"),
-        service_trade_raw=answers.get("B102r_B_Service_trade", {}).get("answer"),
-        medical_category_raw=answers.get("B102r_C_Medical_category", {}).get("answer"),
-        form_type_raw=answers.get("B102r_Form_type", {}).get("answer"),
+        lastname_raw=answer("B102r_1_Last_name"),
+        lastname=answer("B102r_1_Last_name"),
+        firstname_raw=answer("B102r_2_First_name"),
+        firstname=answer("B102r_2_First_name"),
+        army_number_raw=answer("B102r_3_Army_number"),
+        army_number=answer("B102r_3_Army_number"),
+        regiment_or_corp_raw=answer("B102r_4_Regiment"),
+        regiment_or_corp=answer("B102r_4_Regiment"),
+        engagement_raw=answer("B102r_5_Nature_of_engagement"),
+        engagement=answer("B102r_5_Nature_of_engagement"),
+        date_of_enlistment_raw=answer("B102r_6_Joining_date"),
+        date_of_enlistment=answer("B102r_6_Joining_date"),
+        dob_raw=answer("B102r_7_DOB"),
+        dob=answer("B102r_7_DOB"),
+        nationality_raw=answer("B102r_8_Nationality"),
+        nationality=answer("B102r_8_Nationality"),
+        religion_raw=answer("B102r_9_Religion"),
+        religion=answer("B102r_9_Religion"),
+        industry_group_raw=answer("B102r_10_Industry"),
+        industry_group=answer("B102r_10_Industry"),
+        occupation_raw=answer("B102r_11_Occupation"),
+        occupation=answer("B102r_11_Occupation"),
+        non_effective_cause_raw=answer("B102r_12_Non_effective_cause"),
+        non_effective_cause=answer("B102r_12_Non_effective_cause"),
+        marital_status_raw=answer("B102r_13_Marital_status"),
+        marital_status=answer("B102r_13_Marital_status"),
+        hometown_raw=answer("B102r_14_Hometown"),
+        hometown=answer("B102r_14_Hometown"),
+        location_raw=answer("B102r_19_Location"),
+        location=answer("B102r_19_Location"),
+        rank_raw=answer("B102r_A_Rank"),
+        rank=answer("B102r_A_Rank"),
+        service_trade_raw=answer("B102r_B_Service_trade"),
+        service_trade=answer("B102r_B_Service_trade"),
+        medical_category_raw=answer("B102r_C_Medical_category"),
+        medical_category=answer("B102r_C_Medical_category"),
+        form_type_raw=answer("B102r_Form_type"),
+        form_type=answer("B102r_Form_type"),
         form_image=get_image_name(source_filename),
     )
 

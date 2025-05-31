@@ -1,12 +1,14 @@
-from config import settings
 from nicegui import app, ui
 
-from pipeline.ui.views.blank_detection import render as render_blank_detection
-from pipeline.ui.views.browse_database import render as render_browse_database
-from pipeline.ui.views.browse_images import render as render_browse_images
-from pipeline.ui.views.extract_images import render as render_extract_images
-from pipeline.ui.views.form_classification import render as render_form_classification
-from pipeline.ui.views.layout import layout
+from pipeline.ui.config import settings
+from pipeline.ui.dev.views.blank_detection import render as render_blank_detection
+from pipeline.ui.dev.views.browse_database import render as render_browse_database
+from pipeline.ui.dev.views.browse_images import render as render_browse_images
+from pipeline.ui.dev.views.extract_images import render as render_extract_images
+from pipeline.ui.dev.views.form_classification import (
+    render as render_form_classification,
+)
+from pipeline.ui.dev.views.layout import layout
 
 
 @ui.page("/", title="Home")
@@ -66,4 +68,4 @@ app.add_static_files(
     str(settings.images_url_base),
     str(settings.images_dir),
 )
-ui.run()
+ui.run(title="Dev App", port=8090)

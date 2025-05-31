@@ -3,6 +3,17 @@
 Social Dynamics Pipeline is an experimental pipeline for extracting text from handwritten forms and ingesting the data
 into a database for correction and research.
 
+The pipeline has been developed in several parts to maximise flexibility since the project is exploratory:
+
+* **tasks** - these are individual functions that can be used in a variety of ways and arranged in a pipeline
+* **command-line interface** - this is a convenience wrapper around the tasks
+* **web GUI**
+    * `muster` app:
+        * main app for viewing and editing the database
+    * `dev` app:
+        * exposes some pipeline tasks in a user-friendly UI
+        * provides basic image and database browsing to support development
+
 **Status**: Work in progress.
 
 ## Setup
@@ -10,7 +21,8 @@ into a database for correction and research.
 ### Dev Container
 
 A Dev Container configuration is provided for convenient development. You can either run it in Codespaces in the usual
-way or locally with your preferred IDE (e.g. VSCode).
+way or locally with your preferred IDE (e.g. VSCode). By default, it starts `muster` app, but you can also start the
+`dev` app manually if you like.
 
 ### Local Installation
 
@@ -94,14 +106,6 @@ or
 
 ## Usage
 
-The pipeline has been developed in several parts to maximise flexibility since the project is exploratory:
-
-* **tasks** - these are individual functions that can be used in a variety of ways and arranged in a pipeline
-* **command-line interface** - this is a convenience wrapper around the tasks
-* **web GUI**
-    * exposes some tasks in a user-friendly UI
-    * provides basic image and database browsing to support development
-
 ### Command-line Interface
 
 All commands are run via:
@@ -147,9 +151,27 @@ using [BVQA](https://github.com/kingsdigitallab/kdl-vqa).
 **Options**
 `--log-level` (optional): Control output verbosity (DEBUG, INFO, WARNING, ERROR, CRITICAL). Default is WARNING.
 
-### Web Application
+### Web Applications
 
-The web app has 4 pages:
+#### Application `muster` - the main app for viewing and editing the database
+
+##### Using `uv`:
+
+```aiignore
+$ PYTHONPATH=. uv run python pipeline/ui/muster/app.py
+```
+
+##### Direct invocation:
+
+```aiignore
+(venv) $ PYTHONPATH=. python pipeline/muster/app.py
+```
+
+The `muster` app will be available at http://localhost:8080.
+
+#### Application `dev` - a collection of utilities used during development
+
+The `dev` web app has 4 pages:
 
 1. Browse images - browse the images in the configured `IMAGES_DIR`
 2. Extract Images from PDF - wrapper around [
@@ -158,27 +180,19 @@ The web app has 4 pages:
    images
 4. Browse Database - browse the database configured in `DATABASE_NAME`
 
-#### Using `uv`
+The `dev` app will be available at http://localhost:8090.
 
-```aiignore
-$ PYTHONPATH=. uv run python pipeline/ui/app.py
-```
+#### Changing ports
 
-#### Direct invocation
-
-```aiignore
-(venv) $ PYTHONPATH=. python pipeline/ui/app.py
-```
-
-The app will be available on http://localhost:8080. If you want to change the port it runs on, you can pass a different
-port number in the `pipeline/ui/app.py` script on the [
-`ui.run()` line](https://github.com/kingsdigitallab/social-dynamics-pipeline/blob/main/pipeline/ui/app.py#L69).
+By default, the ports are set in their respective `app.py` scripts and will not conflict, so you can run them both at
+the same time. If for some reason you want to change a port, you can pass a
+different port number e.g.
 
 `ui.run(port=8081)`
 
 #### Configure Environmental Variables
 
-The default web GUI settings can be found in `pipeline/ui/config.py`. When running the app using these defaults, it
+The default web GUI settings can be found in `pipeline/ui/config.py`. When running an app using these defaults, it
 presents demo data (images and database). When you want to use real data, you need to override the defaults in an `.env`
 file in the **root of the project**. Typically, you will want to set a different image folder and database:
 

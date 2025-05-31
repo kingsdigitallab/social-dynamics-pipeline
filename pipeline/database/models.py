@@ -15,7 +15,7 @@ class Individual(SQLModel, table=True):
     pdf_id: Optional[str] = Field(default=None)
     lastname: Optional[str] = Field(default=None)
     firstname: Optional[str] = Field(default=None)
-    army_number: Optional[int] = Field(default=None)
+    army_number: Optional[str] = Field(default=None)
     dob: Optional[date] = Field(default=None)
 
     b102rs: List["FormB102r"] = Relationship(back_populates="individual")
@@ -26,58 +26,68 @@ class Individual(SQLModel, table=True):
 # ------------------------
 class Regiment(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    desc: str
+    label: str
+    desc: Optional[str] = None
 
 
 class Rank(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    desc: str
+    label: str
+    desc: Optional[str] = None
 
 
 class Engagement(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    type: str
-    expanded_form: Optional[str] = None
+    label: str
+    desc: Optional[str] = None
 
 
 class Nationality(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    desc: str
+    label: str
+    desc: Optional[str] = None
 
 
 class Religion(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    desc: str
+    label: str
+    desc: Optional[str] = None
 
 
 class Industry(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    desc: str
+    label: str
+    desc: Optional[str] = None
 
 
 class Occupation(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    desc: str
+    label: str
+    desc: Optional[str] = None
 
 
 class ServiceTrade(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    desc: str
+    label: str
+    desc: Optional[str] = None
 
 
 class MaritalStatus(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    desc: str
+    label: str
+    desc: Optional[str] = None
 
 
 class MedicalCategory(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    desc: str
+    label: str
+    desc: Optional[str] = None
 
 
 class Place(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    toponym: str
+    label: str
+    desc: Optional[str] = None
     lat: Optional[float] = None
     long: Optional[float] = None
     external_uri: Optional[str] = Field(default=None, unique=True)
@@ -88,65 +98,248 @@ class Place(SQLModel, table=True):
 # ------------------------
 class FormB102r(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    form_type_raw: Optional[str] = None
-    form_image: Optional[Path] = None
+    form_image: Optional[Path] = Field(
+        default=None, description="Path to the file with an image of this form"
+    )
+    form_type_raw: Optional[str] = Field(
+        default=None, description="Form type as imported from raw source data"
+    )
+    form_type: Optional[str] = Field(default=None, description="Corrected form type")
 
     # Link to individual
-    individual_id: int = Field(foreign_key="individual.id")
+    individual_id: int = Field(
+        foreign_key="individual.id", description="Individual to which this form belongs"
+    )
     individual: Optional[Individual] = Relationship(back_populates="b102rs")
 
     # Personal Info
-    lastname_raw: Optional[str] = None
-    lastname: Optional[str] = None
-    firstname_raw: Optional[str] = None
-    firstname: Optional[str] = None
-    army_number_raw: Optional[str] = None
-    army_number: Optional[int] = None
-    registration_number_raw: Optional[str] = None
-    registration_number: Optional[int] = None
-    dob_raw: Optional[str] = None
-    dob: Optional[date] = None
-    date_of_enlistment_raw: Optional[str] = None
-    date_of_enlistment: Optional[date] = None
-    non_effective_cause_raw: Optional[str] = None
-    non_effective_cause: Optional[str] = None
-    location_raw: Optional[str] = None
-    location: Optional[str] = None
+    lastname_raw: Optional[str] = Field(
+        default=None,
+        description="Last name of individual as imported from raw source data",
+    )
+    lastname: Optional[str] = Field(
+        default=None, description="Corrected last name of individual"
+    )
+
+    firstname_raw: Optional[str] = Field(
+        default=None,
+        description="First name of individual as imported from raw source data",
+    )
+    firstname: Optional[str] = Field(
+        default=None, description="Corrected first name of individual"
+    )
+
+    army_number_raw: Optional[str] = Field(
+        default=None,
+        description="Army number as imported from raw source data",
+    )
+    army_number: Optional[str] = Field(
+        default=None, description="Corrected army number"
+    )
+
+    registration_number_raw: Optional[str] = Field(
+        default=None,
+        description="Registration number as imported from raw source data",
+    )
+    registration_number: Optional[int] = Field(
+        default=None, description="Corrected registration number"
+    )
+
+    dob_raw: Optional[str] = Field(
+        default=None,
+        description="Date of birth as imported from raw source data",
+    )
+    dob: Optional[str] = Field(
+        default=None,
+        description="Corrected date of birth",
+    )
+    dob_date: Optional[date] = Field(
+        default=None,
+        description="Date of birth normalised to valid date",
+    )
+
+    date_of_enlistment_raw: Optional[str] = Field(
+        default=None,
+        description="Date of enlistment as imported from raw source data",
+    )
+    date_of_enlistment: Optional[str] = Field(
+        default=None,
+        description="Corrected date of enlistment",
+    )
+    date_of_enlistment_date: Optional[date] = Field(
+        default=None,
+        description="Date of enlistment normalised to valid date",
+    )
+
+    non_effective_cause_raw: Optional[str] = Field(
+        default=None,
+        description="Non-effective cause as imported from raw source data",
+    )
+    non_effective_cause: Optional[str] = Field(
+        default=None,
+        description="Corrected non-effective cause",
+    )
+
+    location_raw: Optional[str] = Field(
+        default=None,
+        description="Location as imported from raw source data",
+    )
+    location: Optional[str] = Field(
+        default=None,
+        description="Corrected location",
+    )
 
     # Categorical fields with raw + FK
-    regiment_or_corp_raw: Optional[str] = None
-    regiment_or_corp_id: Optional[int] = Field(default=None, foreign_key="regiment.id")
+    regiment_or_corp_raw: Optional[str] = Field(
+        default=None,
+        description="Regiment or corp as imported from raw source data",
+    )
+    regiment_or_corp: Optional[str] = Field(
+        default=None,
+        description="Corrected regiment or corp",
+    )
+    regiment_or_corp_id: Optional[int] = Field(
+        default=None,
+        foreign_key="regiment.id",
+        description="Normalised regiment or corps value",
+    )
 
-    rank_raw: Optional[str] = None
-    rank_id: Optional[int] = Field(default=None, foreign_key="rank.id")
+    rank_raw: Optional[str] = Field(
+        default=None,
+        description="Rank as imported from raw source data",
+    )
+    rank: Optional[str] = Field(
+        default=None,
+        description="Corrected rank",
+    )
+    rank_id: Optional[int] = Field(
+        default=None,
+        foreign_key="rank.id",
+        description="Normalised rank value",
+    )
 
-    engagement_raw: Optional[str] = None
-    engagement_id: Optional[int] = Field(default=None, foreign_key="engagement.id")
+    engagement_raw: Optional[str] = Field(
+        default=None,
+        description="Engagement as imported from raw source data",
+    )
+    engagement: Optional[str] = Field(
+        default=None,
+        description="Corrected engagement",
+    )
+    engagement_id: Optional[int] = Field(
+        default=None,
+        foreign_key="engagement.id",
+        description="Normalised engagement value",
+    )
 
-    nationality_raw: Optional[str] = None
-    nationality_id: Optional[int] = Field(default=None, foreign_key="nationality.id")
+    nationality_raw: Optional[str] = Field(
+        default=None,
+        description="Nationality as imported from raw source data",
+    )
+    nationality: Optional[str] = Field(
+        default=None,
+        description="Corrected nationality",
+    )
+    nationality_id: Optional[int] = Field(
+        default=None,
+        foreign_key="nationality.id",
+        description="Normalised nationality value",
+    )
 
-    religion_raw: Optional[str] = None
-    religion_id: Optional[int] = Field(default=None, foreign_key="religion.id")
+    religion_raw: Optional[str] = Field(
+        default=None,
+        description="Religion as imported from raw source data",
+    )
+    religion: Optional[str] = Field(
+        default=None,
+        description="Corrected religion",
+    )
+    religion_id: Optional[int] = Field(
+        default=None,
+        foreign_key="religion.id",
+        description="Normalised religion value",
+    )
 
-    industry_group_raw: Optional[str] = None
-    industry_group_id: Optional[int] = Field(default=None, foreign_key="industry.id")
+    industry_group_raw: Optional[str] = Field(
+        default=None,
+        description="Industry as imported from raw source data",
+    )
+    industry_group: Optional[str] = Field(
+        default=None,
+        description="Corrected industry",
+    )
+    industry_group_id: Optional[int] = Field(
+        default=None,
+        foreign_key="industry.id",
+        description="Normalised industry value",
+    )
 
-    occupation_raw: Optional[str] = None
-    occupation_id: Optional[int] = Field(default=None, foreign_key="occupation.id")
+    occupation_raw: Optional[str] = Field(
+        default=None,
+        description="Occupation as imported from raw source data",
+    )
+    occupation: Optional[str] = Field(
+        default=None,
+        description="Corrected occupation",
+    )
+    occupation_id: Optional[int] = Field(
+        default=None,
+        foreign_key="occupation.id",
+        description="Normalised occupation value",
+    )
 
-    service_trade_raw: Optional[str] = None
-    service_trade_id: Optional[int] = Field(default=None, foreign_key="servicetrade.id")
+    service_trade_raw: Optional[str] = Field(
+        default=None,
+        description="Service trade as imported from raw source data",
+    )
+    service_trade: Optional[str] = Field(
+        default=None,
+        description="Corrected service trade",
+    )
+    service_trade_id: Optional[int] = Field(
+        default=None,
+        foreign_key="servicetrade.id",
+        description="Normalised service trade value",
+    )
 
-    marital_status_raw: Optional[str] = None
+    marital_status_raw: Optional[str] = Field(
+        default=None,
+        description="Marital status as imported from raw source data",
+    )
+    marital_status: Optional[str] = Field(
+        default=None,
+        description="Corrected marital status",
+    )
     marital_status_id: Optional[int] = Field(
-        default=None, foreign_key="maritalstatus.id"
+        default=None,
+        foreign_key="maritalstatus.id",
+        description="Normalised marital status value",
     )
 
-    medical_category_raw: Optional[str] = None
+    medical_category_raw: Optional[str] = Field(
+        default=None,
+        description="Medical category as imported from raw source data",
+    )
+    medical_category: Optional[str] = Field(
+        default=None,
+        description="Corrected medical category",
+    )
     medical_category_id: Optional[int] = Field(
-        default=None, foreign_key="medicalcategory.id"
+        default=None,
+        foreign_key="medicalcategory.id",
+        description="Normalised medical category value",
     )
 
-    hometown_raw: Optional[str] = None
-    hometown_id: Optional[int] = Field(default=None, foreign_key="place.id")
+    hometown_raw: Optional[str] = Field(
+        default=None,
+        description="Home town as imported from raw source data",
+    )
+    hometown: Optional[str] = Field(
+        default=None,
+        description="Corrected home town",
+    )
+    hometown_id: Optional[int] = Field(
+        default=None,
+        foreign_key="place.id",
+        description="Normalised home town value",
+    )

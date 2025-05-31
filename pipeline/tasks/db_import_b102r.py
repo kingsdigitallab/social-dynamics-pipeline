@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 
 from pipeline.database.init_db import engine
 from pipeline.database.models import FormB102r, Individual
-from pipeline.tasks.db_import_utils import load_json_data
+from pipeline.tasks.utils.db_import_utils import load_json_data
 
 
 def get_image_name(source_filename: Path):

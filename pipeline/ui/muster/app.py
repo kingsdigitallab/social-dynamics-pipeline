@@ -1,14 +1,18 @@
 from nicegui import app, ui
 
 from pipeline.ui.config import settings
+from pipeline.ui.muster.views.home import render as render_home
 from pipeline.ui.muster.views.layout import layout
 
 
-@ui.page("/", title="Home")
+@ui.page("/", title="Roll Review Centre")
 def home():
-    with layout("Home"):
-        ui.label("Coming soon...")
-        # content here
+    with layout(
+        title="Roll Review Centre",
+        description="""Browse all available individuals and forms.
+    Search and select forms for correction.""",
+    ):
+        render_home()
 
 
 app.add_static_files(

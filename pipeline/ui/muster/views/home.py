@@ -1,3 +1,5 @@
+from typing import Any
+
 from nicegui import ui
 from sqlmodel import Session, select
 
@@ -68,16 +70,16 @@ def render():
                 key=lambda fm: fm.lastname or "",
             )
 
-    # def get_forms_from_individual(indiv_id: int) -> list[FormB102r]:
-    #     with Session(engine) as session:
-    #         frms = session.exec(
-    #             select(FormB102r).where(FormB102r.individual_id == indiv_id)
-    #         ).all()
-    #         return sorted(frms, key=lambda f: f.form_type or "")
+    async def start_form_correction():
+        selected_rows: list[dict[str, Any]] = form_table.selected
+        if not selected_rows:
+            ui.notify("Pick a form to correct.", position="center")
+        else:
+            row: dict[str, Any] = selected_rows[0]  # type: ignore
+            form_id = row.get("id")
+            ui.navigate.to("/correct/%d" % form_id)
 
     def update_form_table():
-        forms_table_container.clear()
-
         frms = get_forms()
 
         columns = [
@@ -120,23 +122,20 @@ def render():
             for form in frms
         ]
 
-        with forms_table_container:
-            (
-                ui.table(
-                    columns=columns,
-                    rows=rows,
-                    column_defaults=column_defaults,
-                    row_key="id",
-                    selection="single",
-                    # on_select=lambda e: ui.notify(f"selected: {e.selection}"),
-                )
-                .classes("w-full database-table")
-                .props("bordered v-model:selected=selected")
+        return (
+            ui.table(
+                columns=columns,
+                rows=rows,
+                column_defaults=column_defaults,
+                row_key="id",
+                selection="single",
+                on_select=lambda e: ui.notify(f"selected: {e.selection}"),
             )
+            .classes("w-full database-table")
+            .props("bordered hide-bottom")
+        )
 
     def update_individual_table():
-        individuals_table_container.clear()
-
         indivs = get_individuals()
 
         columns = [
@@ -180,17 +179,16 @@ def render():
             for person in indivs
         ]
 
-        with individuals_table_container:
-            (
-                ui.table(
-                    columns=columns,
-                    rows=rows,
-                    column_defaults=column_defaults,
-                    row_key="id",
-                )
-                .classes("w-full database-table")
-                .props("bordered")
+        return (
+            ui.table(
+                columns=columns,
+                rows=rows,
+                column_defaults=column_defaults,
+                row_key="id",
             )
+            .classes("w-full database-table")
+            .props("bordered")
+        )
 
     # ---------------
     # Search bar
@@ -206,8 +204,6 @@ def render():
 
         with ui.button("Filter", icon="filter_alt"):
             ui.tooltip("Open the filter panel")
-
-    # ui.separator()
 
     # ---------------
     # Tabs
@@ -228,22 +224,22 @@ def render():
         with ui.tab_panel(individuals):
             ui.label("1403 Individuals")
 
-            individuals_table_container = ui.column().classes("w-full")
-            update_individual_table()
+            with ui.column().classes("w-full"):
+                update_individual_table()
 
         # Forms tab
         with ui.tab_panel(forms):
             ui.label("3672 Forms")
 
-            forms_table_container = ui.column().classes("w-full")
-            update_form_table()
+            with ui.column().classes("w-full"):
+                form_table = update_form_table()
 
             with ui.row().classes("w-full items-center gap-4"):
                 with (
                     ui.button(
                         "Start",
                         icon="play_arrow",
-                        on_click=lambda: ui.notify("Start correction!"),
+                        on_click=start_form_correction,
                     )
                     .classes("ml-auto")
                     .props("color=secondary")

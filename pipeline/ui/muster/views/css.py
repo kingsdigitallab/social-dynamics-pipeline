@@ -46,3 +46,10 @@ def home_css():
     }
     """
     )
+
+
+def correct_css():
+    ui.add_css(
+        """
+    """
+    )

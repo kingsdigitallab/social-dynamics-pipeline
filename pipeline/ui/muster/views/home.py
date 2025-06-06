@@ -1,74 +1,24 @@
 from typing import Any
 
 from nicegui import ui
-from sqlmodel import Session, select
+from sqlmodel import Session
 
+from pipeline.database.helpers.form_b102r import get_forms
+from pipeline.database.helpers.individual import get_individuals
 from pipeline.database.init_db import engine
-from pipeline.database.models import FormB102r, Individual
+from pipeline.ui.muster.views.css import home_css
 
 
 def render():
     """Create the Roll Review Centre (homepage correction dashboard)"""
 
-    ui.add_head_html(
-        """
-    <style>
-    /* */
-    .database-table thead tr {
-        background-color: var(--q-primary);
-        color: white;
-    }
-    .q-tab {
-        border-top-left-radius: 0.5rem !important;
-        border-top-right-radius: 0.5rem !important;
-    }
-    /* Unselected tabs */
-    .q-tab:not(.q-tab--active) {
-        background-color: #e5e7eb; /* Tailwind gray-200 */
-        color: #1f2937; /* Tailwind gray-800 for text */
-        transition: background-color 0.2s ease;
-    }
-
-    /* Optional hover effect for unselected tabs */
-    .q-tab:not(.q-tab--active):hover {
-        background-color: #d1d5db; /* Tailwind gray-300 */
-    }
-    /* Tab content area background */
-    .q-tab-panel {
-        background-color: var(--q-primary);
-        color: white;
-        border-radius: 0 0 0.5rem 0.5rem;
-    }
-    </style>
-    """
-    )
+    home_css()
 
     # ----------------
     # Helper functions
     # ----------------
 
     column_defaults = {"align": "left"}
-
-    def get_individuals() -> list[Individual]:
-        with Session(engine) as session:
-            indivs = session.exec(select(Individual)).all()
-            # Sort by numeric part of PDF ID
-            return sorted(
-                indivs,
-                key=lambda ind: (
-                    int(ind.pdf_id.removeprefix("APV"))
-                    if ind.pdf_id and ind.pdf_id.startswith("APV")
-                    else 0
-                ),
-            )
-
-    def get_forms() -> list[FormB102r]:
-        with Session(engine) as session:
-            frms = session.exec(select(FormB102r)).all()
-            return sorted(
-                frms,
-                key=lambda fm: fm.lastname or "",
-            )
 
     async def start_form_correction():
         selected_rows: list[dict[str, Any]] = form_table.selected
@@ -80,7 +30,9 @@ def render():
             ui.navigate.to("/correct/%d" % form_id)
 
     def update_form_table():
-        frms = get_forms()
+
+        with Session(engine) as session:
+            frms = get_forms(session)
 
         columns = [
             {
@@ -129,14 +81,16 @@ def render():
                 column_defaults=column_defaults,
                 row_key="id",
                 selection="single",
-                on_select=lambda e: ui.notify(f"selected: {e.selection}"),
+                # on_select=lambda e: ui.notify(f"selected: {e.selection}"),
             )
             .classes("w-full database-table")
             .props("bordered hide-bottom")
         )
 
     def update_individual_table():
-        indivs = get_individuals()
+
+        with Session(engine) as session:
+            indivs = get_individuals(session)
 
         columns = [
             {"name": "pdf_id", "label": "PDF ID", "field": "pdf_id", "sortable": True},

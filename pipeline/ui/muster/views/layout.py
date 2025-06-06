@@ -2,23 +2,12 @@ from contextlib import contextmanager
 
 from nicegui import html, ui
 
+from pipeline.ui.muster.views.css import layout_css
+
 
 @contextmanager
 def layout(title: str, description: str):
-
-    ui.add_head_html(
-        """
-        /* Prevents toggle disappearing when dark mode is on */
-        <style>
-        .dark-toggle .q-toggle__track {
-            background-color: #ccc !important;
-        }
-        .dark-toggle .q-toggle__thumb {
-            color: #444 !important;
-        }
-        </style>
-    """
-    )
+    layout_css()
 
     with ui.header(elevated=True).classes("q-primary"):
         with ui.row().classes("w-full items-center justify-between"):

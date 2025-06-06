@@ -15,5 +15,5 @@ def get_forms(session: Session) -> list[FormB102r]:
 
 def get_form(session: Session, form_id: int) -> FormB102r | None:
     """Retrieve one B102r form by form_id"""
-    form = session.get(FormB102r.id, form_id)
+    form = session.get(FormB102r, form_id)
     return form

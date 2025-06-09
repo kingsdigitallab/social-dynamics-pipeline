@@ -1,8 +1,8 @@
 import json
 from datetime import datetime, timezone
-from typing import Union
+from typing import Optional, Union, get_args, get_origin
 
-from sqlmodel import Session
+from sqlmodel import Session, SQLModel
 
 from pipeline.database.models import AuditLog
 
@@ -15,13 +15,38 @@ def to_json_value(label: str, id_: int | None = None) -> str:
     return json.dumps(data)
 
 
+def infer_field_type(model: type[SQLModel], field_name: str) -> Optional[str]:
+    """
+    Infers the type of a field so it can be stored in the AuditLog field_type.
+    Written by GPT-4o (gpt-4o-2024-06-03); verified by author
+    """
+    field_info = model.model_fields.get(field_name)
+    if not field_info:
+        return None  # field doesn't exist
+
+    outer_type = field_info.annotation
+
+    # Handle Optional[Something]
+    if get_origin(outer_type) is Union:
+        args = [t for t in get_args(outer_type) if t is not type(None)]
+        if args:
+            outer_type = args[0]  # type: ignore
+
+    # Foreign key fields are usually ints and end with _id
+    if field_name.endswith("_id") and outer_type is int:
+        # Use the field name minus _id as a guess for table name
+        return field_name[:-3]  # e.g. "rank_id" → "rank"
+
+    # Otherwise, just use the type name
+    return outer_type.__name__
+
+
 def log_change(
     session: Session,
     *,
-    table_name: str,
+    model_class: type[SQLModel],
     record_id: int,
     field_name: str,
-    field_type: str | None,
     old_label: str,
     new_label: str,
     old_id: int | None = None,
@@ -30,6 +55,9 @@ def log_change(
     session_id: str | None = None,
 ):
     """Insert an audit log row into the database."""
+    field_type = infer_field_type(model_class, field_name)
+    table_name = model_class.__tablename__
+
     audit_log = AuditLog(
         table_name=table_name,
         record_id=record_id,

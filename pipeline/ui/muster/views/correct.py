@@ -4,9 +4,15 @@ from datetime import date, datetime
 from typing import Optional, Union
 
 from nicegui import ui
+from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
-from pipeline.database.helpers.form_b102r import get_form, save_form_with_log
+from pipeline.database.helpers.form_b102r import (
+    get_form,
+    get_individual_by_form_id,
+    save_form_with_log,
+)
+from pipeline.database.helpers.individual import save_individual_with_log
 from pipeline.database.init_db import engine
 from pipeline.database.models import FormB102r
 from pipeline.ui.muster.views.css import correct_css
@@ -135,14 +141,48 @@ def render(form_id: int):
         assert frm is not None, "Expected frm to be loaded"
         assert original_frm is not None, "Expected original_frm to be loaded"
 
-        with Session(engine) as session:
-            save_form_with_log(
-                session,
-                updated_form=frm,
-                original_form=original_frm,
-                change_reason="muster",
+        try:
+            with Session(engine) as session:
+                save_form_with_log(
+                    session,
+                    updated_form=frm,
+                    original_form=original_frm,
+                    change_reason="muster",
+                )
+                assert original_frm.id is not None
+                individual = get_individual_by_form_id(session, original_frm.id)
+                if individual is None:
+                    ui.notify(
+                        """Individual not found for this form. Please contact admin,
+                        quoting B102r form id '{}'.""".format(
+                            frm.id
+                        ),
+                        color="negative",
+                        position="center",
+                    )
+                assert individual is not None
+                original_individual = copy.deepcopy(individual)
+                individual.army_number = frm.army_number
+                individual.dob = frm.dob_date
+                save_individual_with_log(
+                    session,
+                    updated_individual=individual,
+                    original_individual=original_individual,
+                    change_reason="muster",
+                )
+                ui.notify("Changes saved", color="positive", position="center")
+        except (ValueError, TypeError) as e:
+            ui.notify(
+                f"Validation error: {str(e)}. No changes were saved.",
+                color="negative",
+                position="center",
             )
-        ui.notify("Changes saved", color="positive", position="center")
+        except SQLAlchemyError as e:
+            ui.notify(
+                f"Database error: {str(e)}. No changes were saved.",
+                color="negative",
+                position="center",
+            )
 
     def discard_changes() -> None:
         """Discard all changes made by user and reload all fields from the database."""

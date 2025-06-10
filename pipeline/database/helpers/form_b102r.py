@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 
 from pipeline.database.helpers.audit_log import log_change
-from pipeline.database.models import FormB102r
+from pipeline.database.models import FormB102r, Individual
 from pipeline.database.validators import validate_date
 
 
@@ -67,3 +67,9 @@ def save_form_with_log(
 
     session.merge(updated_form)
     session.commit()
+
+
+def get_individual_by_form_id(session: Session, form_id: int) -> Individual | None:
+    """Retrieve the Individual attached to the B102r form by form_id"""
+    individual = session.get(Individual, form_id)
+    return individual

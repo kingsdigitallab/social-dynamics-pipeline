@@ -1,4 +1,7 @@
 import copy
+from collections import namedtuple
+from datetime import date
+from typing import Optional
 
 from nicegui import ui
 from sqlmodel import Session
@@ -33,60 +36,88 @@ def render(form_id: int):
         ui.label("Form Type: B102").classes("text-bold")
     ui.separator()
 
-    text_fields = {
-        1: ["1. Surname", "lastname"],
-        2: ["2. Christian Names", "firstname"],
-        3: ["3. Army Number", "army_number"],
-        4: ["4. Regiment or Corps", "regiment_or_corp"],
-        5: ["5. Nature of Engagement", "engagement"],
-        6: ["6. Date of Joining / Enlistment", "date_of_enlistment"],
-        7: ["7. Date of Birth", "dob"],
-        8: ["8. Nationality", "nationality"],
-        9: ["9. Religion", "religion"],
-        10: ["10. Industry Group", "industry_group"],
-        11: ["11. Occupational Classification", "occupation"],
-        12: ["12. Cause of Becoming Non-Effective", "non_effective_cause"],
-        13: ["13. Single or Married", "marital_status"],
-        14: ["14. Home Town and Country (U.K.) or Country", "hometown"],
-        15: ["A. Rank", "rank"],
-        16: ["B. Service Trade and Classification", "service_trade"],
-        17: ["C. Medical Category", "medical_category"],
-        18: ["19. Location", "location"],
+    Field = namedtuple("Field", ["label", "db_field", "type"])
+
+    fields_list = {
+        1: Field("1. Surname", "lastname", "text"),
+        2: Field("2. Christian Names", "firstname", "text"),
+        3: Field("3. Army Number", "army_number", "text"),
+        4: Field("4. Regiment or Corps", "regiment_or_corp", "text"),
+        5: Field("5. Nature of Engagement", "engagement", "text"),
+        6: Field("6. Date of Joining / Enlistment", "date_of_enlistment", "text"),
+        7: Field("7. Date of Birth", "dob", "text"),
+        8: Field("Date of Birth", "dob_date", "date"),
+        9: Field("8. Nationality", "nationality", "text"),
+        10: Field("9. Religion", "religion", "text"),
+        11: Field("10. Industry Group", "industry_group", "text"),
+        12: Field("11. Occupational Classification", "occupation", "text"),
+        13: Field("12. Cause of Becoming Non-Effective", "non_effective_cause", "text"),
+        14: Field("13. Single or Married", "marital_status", "text"),
+        15: Field("14. Home Town and Country (U.K.) or Country", "hometown", "text"),
+        16: Field("A. Rank", "rank", "text"),
+        17: Field("B. Service Trade and Classification", "service_trade", "text"),
+        18: Field("C. Medical Category", "medical_category", "text"),
+        19: Field("19. Location", "location", "text"),
     }
 
-    # lookup_fields = {
-    #     1: ["1. Surname", "lastname"],
-    #     2: ["2. Christian Names", "firstname"],
-    #     3: ["3. Army Number", "army_number"],
-    #     4: ["4. Regiment or Corps", "regiment_or_corp"],
-    #     5: ["5. Nature of Engagement", "engagement"],
-    #     6: ["6. Date of Joining / Enlistment", "date_of_enlistment"],
-    #     7: ["7. Date of Birth", "dob"],
-    #     8: ["8. Nationality", "nationality"],
-    #     9: ["9. Religion", "religion"],
-    #     10: ["10. Industry Group", "industry_group"],
-    #     11: ["11. Occupational Classification", "occupation"],
-    #     12: ["12. Cause of Becoming Non-Effective", "non_effective_cause"],
-    #     13: ["13. Single or Married", "marital_status"],
-    #     14: ["14. Home Town and Country (U.K.) or Country", "hometown"],
-    #     15: ["A. Rank", "rank"],
-    #     16: ["B. Service Trade and Classification", "service_trade"],
-    #     17: ["C. Medical Category", "medical_category"],
-    #     18: ["19. Location", "location"],
-    # }
+    async def validate_ddmmyyyy(value: str) -> Optional[str]:
+        """Validate date strings for date input fields,
+        handling 2-digit and 4-digit years."""
+        try:
+            day, month, year = map(int, value.split("/"))
+
+            # @TODO Validate single-digit years correctly
+            if 0 <= year <= 49:  # 2-digit years
+                year = 1900 + year  # Early C20th
+            elif 50 <= year <= 99:
+                year = 1800 + year  # Late C19th
+            elif 1800 <= year <= 1950:  # Valid 4-digit year
+                pass
+            else:
+                return "Invalid year. Must be between 1800 and 1950."
+            date(year, month, day)  # Validate the date
+            return None
+
+        except (AttributeError, ValueError, TypeError) as e:
+            print(e)
+            return "Invalid date format. Use DD/MM/YY or DD/MM/YYYY."
 
     @ui.refreshable
-    def create_inputs(
-        fields: dict[int, list[str]], form: FormB102r, field_type: str = "text"
-    ) -> None:
-        """Create a series of inputs based on a model. Default input type is 'text'"""
+    def create_inputs(fields: dict[int, list[Field]], form: FormB102r) -> None:
+        """Create a series of inputs based on a model."""
         ordered_fields: list = sorted(fields.items())
-        if field_type == "text":
-            for field in ordered_fields:
-                label, field_name = field[1][0], field[1][1]
+
+        for field in ordered_fields:
+            label, field_name, field_type = (
+                field[1].label,
+                field[1].db_field,
+                field[1].type,
+            )
+            if field_type == "text":
                 ui.input(label=label).bind_value(form, field_name).props(
                     "outlined hide-bottom-space"
                 )
+            if field_type == "date":
+                with ui.input(
+                    "Date of Birth",
+                    placeholder="Pick date",
+                    validation=validate_ddmmyyyy,
+                ).props("outlined hide-bottom-space") as date_input:
+                    with ui.menu().props("no-parent-event") as menu:
+                        with (
+                            ui.date(mask="DD/MM/YYYY")
+                            .bind_value(date_input)
+                            .props(
+                                '''default-year-month=1910/01
+                                :options="date => date <= '1945/01/01'"'''
+                            )
+                        ):
+                            with ui.row().classes("justify-end"):
+                                ui.button("Close", on_click=menu.close).props("flat")
+                    with date_input.add_slot("append"):
+                        ui.icon("edit_calendar").on("click", menu.open).classes(
+                            "cursor-pointer"
+                        )
 
     def save_changes() -> None:
         assert frm is not None, "Expected frm to be loaded"
@@ -104,7 +135,7 @@ def render(form_id: int):
     def discard_changes() -> None:
         """Discard all changes made by user and reload all fields from the database."""
         load_form(frm.id)  # type: ignore
-        create_inputs.refresh(text_fields, frm)
+        create_inputs.refresh(fields_list, frm)
 
     def confirm_discard() -> None:
         confirm_discard_dialog.close()
@@ -133,10 +164,7 @@ def render(form_id: int):
                     # Text fields
                     with ui.column().classes("full"):
                         assert frm is not None
-                        create_inputs(text_fields, frm)
-                    # Lookup fields
-                    # with ui.column().classes("w-1/2"):
-                    #     create_inputs(lookup_fields, frm, field_type="lookup")
+                        create_inputs(fields_list, frm)
 
         # Right column: image
         with ui.column().classes("w-3/4"):

@@ -7,7 +7,7 @@ from sqlmodel import Session, SQLModel
 from pipeline.database.models import AuditLog
 
 
-def to_json_value(label: str, id_: int | None = None) -> str:
+def _to_json_value(label: str, id_: int | None = None) -> str:
     """Create a JSON string for storing lookup/text field values."""
     data: dict[str, Union[str, int]] = {"label": label}
     if id_ is not None:
@@ -15,7 +15,7 @@ def to_json_value(label: str, id_: int | None = None) -> str:
     return json.dumps(data)
 
 
-def infer_field_type(model: type[SQLModel], field_name: str) -> Optional[str]:
+def _infer_field_type(model: type[SQLModel], field_name: str) -> Optional[str]:
     """
     Infers the type of a field so it can be stored in the AuditLog field_type.
     Written by GPT-4o (gpt-4o-2024-06-03); verified by author
@@ -55,7 +55,7 @@ def log_change(
     session_id: str | None = None,
 ):
     """Insert an audit log row into the database."""
-    field_type = infer_field_type(model_class, field_name)
+    field_type = _infer_field_type(model_class, field_name)
     table_name = model_class.__tablename__
 
     audit_log = AuditLog(
@@ -63,8 +63,8 @@ def log_change(
         record_id=record_id,
         field_name=field_name,
         field_type=field_type,
-        old_value=to_json_value(old_label, old_id),
-        new_value=to_json_value(new_label, new_id),
+        old_value=_to_json_value(old_label, old_id),
+        new_value=_to_json_value(new_label, new_id),
         change_reason=change_reason,
         session_id=session_id,
         timestamp=datetime.now(timezone.utc),

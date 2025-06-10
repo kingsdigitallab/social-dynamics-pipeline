@@ -1,7 +1,7 @@
 import copy
 from collections import namedtuple
-from datetime import date
-from typing import Optional
+from datetime import date, datetime
+from typing import Optional, Union
 
 from nicegui import ui
 from sqlmodel import Session
@@ -60,27 +60,33 @@ def render(form_id: int):
         19: Field("19. Location", "location", "text"),
     }
 
-    async def validate_ddmmyyyy(value: str) -> Optional[str]:
-        """Validate date strings for date input fields,
-        handling 2-digit and 4-digit years."""
-        try:
-            day, month, year = map(int, value.split("/"))
+    async def validate_ddmmyyyy(value: Union[str, date]) -> Optional[str]:
+        """Validate date input strings. Supports ISO, DD/MM/YY, DD/MM/YYYY formats."""
+        if value is None or isinstance(value, date):
+            return None  # Already a valid date object
 
-            # @TODO Validate single-digit years correctly
-            if 0 <= year <= 49:  # 2-digit years
-                year = 1900 + year  # Early C20th
-            elif 50 <= year <= 99:
-                year = 1800 + year  # Late C19th
-            elif 1800 <= year <= 1950:  # Valid 4-digit year
-                pass
-            else:
-                return "Invalid year. Must be between 1800 and 1950."
-            date(year, month, day)  # Validate the date
-            return None
+        if isinstance(value, str):
+            value = value.strip()
+            try:
+                # Try ISO 8601 format YYYY-MM-DD
+                date.fromisoformat(value)
+                return None
+            except ValueError:
+                pass  # Try next format
 
-        except (AttributeError, ValueError, TypeError) as e:
-            print(e)
-            return "Invalid date format. Use DD/MM/YY or DD/MM/YYYY."
+            try:
+                parts = value.split("/")
+                if len(parts) != 3:
+                    return "Date must be in YYYY-MM-DD or DD/MM/YYYY format."
+
+                # Final check for parsable date
+                datetime.strptime(value, "%d/%m/%Y").date()
+                return None
+
+            except (ValueError, TypeError):
+                return "Date must be in DD/MM/YYYY format."
+
+        return "Invalid value. Date must be in YYYY-MM-DD or DD/MM/YYYY format."
 
     @ui.refreshable
     def create_inputs(fields: dict[int, list[Field]], form: FormB102r) -> None:
@@ -97,27 +103,33 @@ def render(form_id: int):
                 ui.input(label=label).bind_value(form, field_name).props(
                     "outlined hide-bottom-space"
                 )
+
             if field_type == "date":
-                with ui.input(
-                    "Date of Birth",
-                    placeholder="Pick date",
-                    validation=validate_ddmmyyyy,
-                ).props("outlined hide-bottom-space") as date_input:
+                with (
+                    ui.input(
+                        "Date of Birth (normalised)",
+                        placeholder="Pick date",
+                        validation=validate_ddmmyyyy,
+                    )
+                    .bind_value(form, field_name)
+                    .props("outlined hide-bottom-space") as date_input
+                ):
+
                     with ui.menu().props("no-parent-event") as menu:
                         with (
-                            ui.date(mask="DD/MM/YYYY")
+                            ui.date(mask="YYYY-MM-DD")
                             .bind_value(date_input)
                             .props(
-                                '''default-year-month=1910/01
+                                '''minimal default-year-month=1910/01
                                 :options="date => date <= '1945/01/01'"'''
                             )
                         ):
                             with ui.row().classes("justify-end"):
                                 ui.button("Close", on_click=menu.close).props("flat")
-                    with date_input.add_slot("append"):
-                        ui.icon("edit_calendar").on("click", menu.open).classes(
-                            "cursor-pointer"
-                        )
+                        with date_input.add_slot("append"):
+                            ui.icon("edit_calendar").on("click", menu.open).classes(
+                                "cursor-pointer"
+                            )
 
     def save_changes() -> None:
         assert frm is not None, "Expected frm to be loaded"

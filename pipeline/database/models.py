@@ -4,7 +4,10 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
+from pydantic import field_validator
 from sqlmodel import Field, Relationship, SQLModel
+
+from pipeline.database.validators import validate_date
 
 
 # ------------------------
@@ -157,6 +160,12 @@ class FormB102r(SQLModel, table=True):
         default=None,
         description="Date of birth normalised to valid date",
     )
+
+    # noinspection PyNestedDecorators
+    @field_validator("dob_date", mode="before")
+    @classmethod
+    def validate_date(cls, value):
+        return validate_date(value)
 
     date_of_enlistment_raw: Optional[str] = Field(
         default=None,

@@ -2,6 +2,7 @@ from sqlmodel import Session, select
 
 from pipeline.database.helpers.audit_log import log_change
 from pipeline.database.models import FormB102r
+from pipeline.database.validators import validate_date
 
 
 def get_forms(session: Session) -> list[FormB102r]:
@@ -49,6 +50,8 @@ def save_form_with_log(
         new_value = getattr(updated_form, field)
 
         assert updated_form.id is not None, "Form must have an ID to be saved"
+
+        updated_form.dob_date = validate_date(updated_form.dob_date)
 
         if old_value != new_value:
             log_change(

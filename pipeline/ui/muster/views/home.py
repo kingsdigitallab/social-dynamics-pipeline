@@ -81,10 +81,10 @@ def render():
                 column_defaults=column_defaults,
                 row_key="id",
                 selection="single",
-                # on_select=lambda e: ui.notify(f"selected: {e.selection}"),
+                pagination={"rowsPerPage": 10, "sortBy": "lastname", "page": 1},
             )
             .classes("w-full database-table")
-            .props("bordered hide-bottom")
+            .props("bordered")
         )
 
     def update_individual_table():
@@ -139,6 +139,7 @@ def render():
                 rows=rows,
                 column_defaults=column_defaults,
                 row_key="id",
+                pagination={"rowsPerPage": 10, "sortBy": "lastname", "page": 1},
             )
             .classes("w-full database-table")
             .props("bordered")

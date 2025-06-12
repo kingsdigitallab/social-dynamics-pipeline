@@ -162,6 +162,8 @@ def render(form_id: int):
                     )
                 assert individual is not None
                 original_individual = copy.deepcopy(individual)
+                individual.firstname = frm.firstname
+                individual.lastname = frm.lastname
                 individual.army_number = frm.army_number
                 individual.dob = frm.dob_date
                 save_individual_with_log(

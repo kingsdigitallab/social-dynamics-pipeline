@@ -113,12 +113,12 @@ def render():
                 "field": "army_number",
                 "sortable": True,
             },
-            {
-                "name": "num_forms",
-                "label": "# Forms",
-                "field": "num_forms",
-                "sortable": True,
-            },
+            # {
+            #     "name": "num_forms",
+            #     "label": "# Forms",
+            #     "field": "num_forms",
+            #     "sortable": True,
+            # },
         ]
 
         rows = [

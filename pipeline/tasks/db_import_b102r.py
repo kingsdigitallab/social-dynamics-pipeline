@@ -1,23 +1,21 @@
+import logging
 from pathlib import Path
 from typing import Optional
 
 from sqlmodel import Session, select
 
+from pipeline.database.helpers.matchers import is_individual_match
 from pipeline.database.init_db import engine
 from pipeline.database.models import FormB102r, Individual
-from pipeline.tasks.utils.db_import_utils import load_json_data
+from pipeline.logging_config import setup_logging
+from pipeline.tasks.utils.db_import_utils import get_image_name, load_json_data
 
-
-def get_image_name(source_filename: Path):
-    img_path = Path(source_filename)
-    img_frags = img_path.stem.split(".")
-    img_stem = img_frags[0]
-    img_ext = img_frags[1].split("_")[0]
-    image_name = img_stem + "." + img_ext
-    return image_name
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 def extract_b102r_data(source_filename: Path, json_data: dict) -> FormB102r:
+    """Extract B102r data from a BVQA json file and return an instantiated FormB102r."""
     # @TODO handle more than 1 model section in JSON
     model_data = next(iter(json_data["models"].values()))  # First model section
     answers = model_data["questions"]
@@ -71,16 +69,58 @@ def extract_b102r_data(source_filename: Path, json_data: dict) -> FormB102r:
 def get_or_create_individual(
     session: Session, record: FormB102r, source_filename: str
 ) -> Individual:
+    """
+    Check if a matching Individual exists for the PDF filename identifier; if not
+    create one.
+
+    Individuals are considered a "match" if they match on PDF filename identifier.
+
+    Log if record matches individual on lastname and firstname, or not, for further
+    analysis. At the moment, the function does not use this to supplement matching
+    because the heuristic is not accurate enough. Log analysis can be used to identify
+    and manually fix cases where there are 2 individuals in 1 PDF.
+
+    @TODO improve heuristic to allow for more accurate matching.
+    """
     pdf_id = Path(source_filename).name.split("_")[0]  # type: ignore
 
-    # @TODO account for 2 individuals in 1 PDF later
+    # Find any existing Individuals with the same PDF number
     stmt = select(Individual).where(
-        Individual.pdf_id == pdf_id,  # Simple match on PDF ID
+        Individual.pdf_id == pdf_id,
     )
-    existing = session.exec(stmt).first()  # type: ignore
-    if existing:
-        return existing
+    existing: list[Individual] = list(session.exec(stmt))  # type: ignore
 
+    if existing:
+        num_matches = len(existing)
+        logger.info("%s existing Individual found for pdf_id=%s", num_matches, pdf_id)
+
+        # Check and log (only) if any existing individuals also match on name fields
+        for existing_individual in existing:
+            if is_individual_match(existing_individual, record):
+                logger.info(
+                    "Individual id=%s and FormB102r form_image=%s match on name "
+                    "fields.",
+                    existing_individual.id,
+                    record.form_image,
+                )
+            else:
+                logger.info(
+                    "Individual id=%s and FormB102r form_image=%s do not match on "
+                    "name fields.",
+                    existing_individual.id,
+                    record.form_image,
+                )
+
+        if num_matches == 1:
+            return existing[0]
+        elif num_matches > 1:
+            # This case is currently rare so just return first match for now and log
+            logger.warning(
+                "More than one matching Individual found for pdf_id=%s", pdf_id
+            )
+            return existing[0]
+
+    # Otherwise there is no existing individual, so create one
     individual = Individual(
         pdf_id=pdf_id,
         lastname=record.lastname_raw,

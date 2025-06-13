@@ -134,16 +134,37 @@ def get_or_create_individual(
 
 def import_b102r_json(json_path: Path, session: Session):
     data = load_json_data(json_path)
+    logger.info("JSON data loaded for %s", json_path)
+
     form_record = extract_b102r_data(json_path, data)
+    logger.info(
+        "FormB102r form_image=%s created for %s, %s ",
+        form_record.form_image,
+        form_record.lastname_raw,
+        form_record.firstname_raw,
+    )
+
     individual = get_or_create_individual(
         session, form_record, source_filename=str(json_path)
     )
     form_record.individual = individual
+    logger.info(
+        "FormB102r form_image=%s added to Individual id=%s",
+        form_record.form_image,
+        individual.id,
+    )
+
     session.add(form_record)
     session.commit()
 
 
-def import_all_in_dir(folder: Path):
+def import_all_in_dir(folder: Path) -> int:
+    imported_count = 0
     with Session(engine) as session:
         for file in folder.glob("*.json"):
-            import_b102r_json(file, session)
+            try:
+                import_b102r_json(file, session)
+                imported_count += 1
+            except Exception as e:
+                logger.warning("Failed to import %s: %s", file.name, e)
+    return imported_count

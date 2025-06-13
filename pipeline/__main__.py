@@ -379,12 +379,12 @@ def import_b102r(
         )
         raise typer.Exit(code=1)
 
-    import_all_in_dir(input_dir)
+    num_imported = import_all_in_dir(input_dir)
 
     elapsed = time.time() - start_time
     typer.echo(
         typer.style(
-            f"Successfully imported B102r forms from {input_dir} "
+            f"Successfully imported {num_imported} B102r forms from {input_dir} "
             f"in {elapsed:.1f} seconds.",
             fg=typer.colors.GREEN,
             bold=True,

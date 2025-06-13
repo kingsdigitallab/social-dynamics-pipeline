@@ -85,7 +85,7 @@ def is_individual_match(individual: Individual, form: FormB102r) -> bool:
     else:
         logger.info(
             "Individual id=%s and FormB102r form_image==%s do not match on field "
-            "'lastname': %s, %s",
+            "'firstname': %s, %s",
             individual.id,
             form.form_image,
             individual.firstname,

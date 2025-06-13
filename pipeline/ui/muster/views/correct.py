@@ -35,7 +35,6 @@ def render(form_id: int):
 
     correct_css()
     load_form(form_id)
-    print(frm)
 
     with ui.row().classes("w-full items-center justify-between"):
         ui.html(f"<h3 class='text-xl font-bold my-4'>ID: {form_id}</h2>")

@@ -9,7 +9,7 @@ from sqlmodel import Session
 
 from pipeline.database.helpers.form_b102r import (
     get_form,
-    get_individual_by_form_id,
+    get_individual_by_form,
     save_form_with_log,
 )
 from pipeline.database.helpers.individual import save_individual_with_log
@@ -149,7 +149,7 @@ def render(form_id: int):
                     change_reason="muster",
                 )
                 assert original_frm.id is not None
-                individual = get_individual_by_form_id(session, original_frm.id)
+                individual = get_individual_by_form(session, original_frm)
                 if individual is None:
                     ui.notify(
                         """Individual not found for this form. Please contact admin,

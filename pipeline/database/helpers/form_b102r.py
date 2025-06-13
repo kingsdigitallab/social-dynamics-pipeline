@@ -69,7 +69,10 @@ def save_form_with_log(
     session.commit()
 
 
-def get_individual_by_form_id(session: Session, form_id: int) -> Individual | None:
-    """Retrieve the Individual attached to the B102r form by form_id"""
-    individual = session.get(Individual, form_id)
-    return individual
+def get_individual_by_form(session: Session, form: FormB102r) -> Individual | None:
+    """Retrieve the Individual attached to the B102r form"""
+    if form.id is not None:
+        refreshed_form = session.get(FormB102r, form.id)
+        if refreshed_form:
+            return refreshed_form.individual
+    return None

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from pipeline.tasks.utils.db_import_utils import get_image_name, load_json_data
+from pipeline.tasks.utils.db_import_utils import get_image_path, load_json_data
 
 
 @pytest.mark.parametrize(
@@ -12,12 +12,12 @@ from pipeline.tasks.utils.db_import_utils import get_image_name, load_json_data
         # Standard expected case
         (
             Path("APV01_page8_img1_b102r.jpg_644894.qas.json"),
-            "APV01_page8_img1_b102r.jpg",
+            "APV01/APV01_page8_img1_b102r.jpg",
         ),
     ],
 )
-def test_get_image_name(source_filename, expected_image_name):
-    assert get_image_name(source_filename) == expected_image_name
+def test_get_image_path(source_filename, expected_image_name):
+    assert get_image_path(source_filename) == expected_image_name
 
 
 def test_load_json_data(tmp_path: Path):

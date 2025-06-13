@@ -77,9 +77,7 @@ def render():
                     # Image display
                     with ui.column().classes("w-3/5 items-center"):
                         if form.form_image:
-                            folder = form.form_image.split("_")[0]
-                            image_url = f"/images/{folder}/{form.form_image}"
-                            # ui.label(image_url)
+                            image_url = f"/images/{form.form_image}"
                             ui.image(image_url).classes(
                                 "w-[100%] h-auto object-contain rounded shadow"
                             )

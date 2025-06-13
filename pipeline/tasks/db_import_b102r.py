@@ -8,7 +8,7 @@ from pipeline.database.helpers.matchers import is_individual_match
 from pipeline.database.init_db import engine
 from pipeline.database.models import FormB102r, Individual
 from pipeline.logging_config import setup_logging
-from pipeline.tasks.utils.db_import_utils import get_image_name, load_json_data
+from pipeline.tasks.utils.db_import_utils import get_image_path, load_json_data
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ def extract_b102r_data(source_filename: Path, json_data: dict) -> FormB102r:
         medical_category=answer("B102r_C_Medical_category"),
         form_type_raw=answer("B102r_Form_type"),
         form_type=answer("B102r_Form_type"),
-        form_image=get_image_name(source_filename),
+        form_image=get_image_path(source_filename),
     )
 
 
